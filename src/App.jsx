@@ -15,7 +15,7 @@ const Founder = lazy(() => import('./pages/Founder'));
 const Director = lazy(() => import('./pages/Director'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Registration = lazy(() => import('./pages/Registration'));
-const DElEd = lazy(() => import('./pages/DElEd'));
+const DElEd = lazy(() => import('./pages/Deled'));
 
 function App() {
   const [loading, setLoading] = useState(true);
