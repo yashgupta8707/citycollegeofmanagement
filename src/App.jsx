@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Loading from './components/Loading';
+import RegistrationDetails from './pages/RegistrationDetails';
 
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'));
@@ -44,6 +45,7 @@ function App() {
               <Route path="/director-message" element={<Director />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/registration" element={<Registration />} />
+              <Route path="/registration-details/:id" element={<RegistrationDetails />} />
               <Route path="/deled" element={<DElEd />} />
             </Routes>
           </Suspense>

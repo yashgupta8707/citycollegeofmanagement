@@ -296,7 +296,7 @@ const Home = () => {
       
 
       {/* Statistics Section */}
-      <section id="section-stats" className="py-20 gradient-bg bg-gray-400">
+      <section id="section-stats" className="py-20 gradient-bg bg-gray-700">
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -321,7 +321,7 @@ const Home = () => {
       </section>
 
       {/* Registration CTA */}
-      <section className="py-20 bg-gradient-to-r from-secondary-500 to-secondary-600 bg-gray-400">
+      <section className="py-5 bg-gradient-to-r from-secondary-500 to-secondary-600 bg-gray-400">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between">
             <div className="text-white mb-8 lg:mb-0">
