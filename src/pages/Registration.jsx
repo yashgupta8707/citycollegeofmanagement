@@ -282,7 +282,7 @@ const Registration = () => {
       payload.append("signature", signature);
 
       const response = await axios.post(
-        "https://clc-backend-0isa.onrender.com",
+        "https://clc-backend-0isa.onrender.com/api/students/register",
         payload,
         {
           headers: { "Content-Type": "multipart/form-data" },
