@@ -20,7 +20,7 @@ const RegistrationDetails = () => {
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const printRef = useRef();
+  const printRef = useRef(null);
 
   // Fetch student from backend using ID
   useEffect(() => {
@@ -40,9 +40,9 @@ const RegistrationDetails = () => {
     fetchStudent();
   }, [id, navigate]);
 
-  // Print handler
+  // Print handler - UPDATED API
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: `Registration_${student?.registrationNo || id}`,
     onAfterPrint: () => toast.success("Document printed successfully!"),
   });
@@ -180,58 +180,105 @@ const RegistrationDetails = () => {
                   <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-700 leading-tight mb-1">
                     CITY COLLEGE OF MANAGEMENT
                   </h1>
-                  <p className="font-bold text-sm tracking-wide text-gray-700 mb-1">
-                    COLLEGE CODE - 290044
+                  <p className="text-base sm:text-lg text-yellow-600 font-semibold">
+                    (Under DCRUST University, Murthal)
                   </p>
-                  <p className="text-sm text-gray-600">
-                    TiwariGanj, Chinhat, Ayodhya Road, Lucknow
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                    Sector M, Nishatganj, Lucknow-226006 | Phone: +91-0522
+                    4064545, 4064546, 4029550
                   </p>
                 </div>
-                <div className="w-20 flex-shrink-0"></div>
+                <img
+                  src="/lucknow-university-logo.png"
+                  alt="Lucknow University Logo"
+                  className="h-20 w-20 object-contain flex-shrink-0"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              </div>
+
+              <div className="mt-4 text-center bg-gradient-to-r from-yellow-600 to-amber-600 text-white py-2 rounded-lg font-bold text-lg print:bg-gray-800">
+                REGISTRATION FORM
               </div>
             </div>
 
-            {/* Registration Number & Barcode */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-100 p-4 border-b border-gray-300 print:bg-gray-200 print:border-black">
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-gray-700 text-sm">Registration No:</span>
-                <span className="font-mono text-lg font-extrabold text-blue-600">
-                  {regNo}
-                </span>
-              </div>
-              <div className="flex justify-center items-center">
-                <div className="bg-white p-2 rounded border border-gray-300 print:border-black">
+            {/* CONTENT - Compact Spacing */}
+            <div className="p-6 space-y-4 print:space-y-3 print:p-4">
+              {/* REGISTRATION INFO & BARCODE */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-3 border-b-2 border-gray-300 print:border-black">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-800">
+                    Registration No:{" "}
+                    <span className="text-blue-600">{regNo}</span>
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Date: {submissionDate}
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
                   <Barcode
                     value={regNo}
-                    height={50}
                     width={1.5}
-                    displayValue={false}
-                    margin={0}
+                    height={40}
+                    fontSize={12}
+                    margin={5}
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="p-6 space-y-6">
-              {/* PERSONAL DETAILS */}
+              {/* COURSE SELECTION */}
               <section>
-                <h2 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
-                  PERSONAL DETAILS
+                <h2 className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                  COURSE SELECTION
                 </h2>
                 <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
                   <table className="w-full text-sm">
                     <tbody>
                       <tr className="border-b border-gray-200 print:border-black">
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
-                          Student Name
+                          Course
                         </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {student.studentName}
+                        <td className="px-4 py-3 text-gray-900 font-medium">
+                          {student.course}
+                        </td>
+                      </tr>
+                      {student.specialization && (
+                        <tr>
+                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                            Specialization
+                          </td>
+                          <td className="px-4 py-3 text-gray-900">
+                            {student.specialization}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* STUDENT DETAILS */}
+              <section>
+                <h2 className="bg-gradient-to-r from-green-600 to-teal-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                  STUDENT DETAILS
+                </h2>
+                <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
+                  <table className="w-full text-sm">
+                    <tbody>
+                      <tr className="border-b border-gray-200 print:border-black">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                          Full Name
+                        </td>
+                        <td className="px-4 py-3 text-gray-900 w-1/4 font-medium">
+                          {student.fullName || student.studentName}
                         </td>
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
-                          Date of Birth
+                          Father's Name
                         </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">{dob}</td>
+                        <td className="px-4 py-3 text-gray-900 w-1/4">
+                          {student.fatherName}
+                        </td>
                       </tr>
                       <tr className="border-b border-gray-200 print:border-black">
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
@@ -241,46 +288,50 @@ const RegistrationDetails = () => {
                           {student.motherName}
                         </td>
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
-                          Gender
+                          Date of Birth
                         </td>
-                        <td className="px-4 py-3 text-gray-900">{student.gender}</td>
+                        <td className="px-4 py-3 text-gray-900">{dob}</td>
                       </tr>
                       <tr className="border-b border-gray-200 print:border-black">
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
-                          Father's Name
+                          Gender
                         </td>
                         <td className="px-4 py-3 text-gray-900">
-                          {student.fatherName}
+                          {student.gender}
                         </td>
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
                           Category
                         </td>
-                        <td className="px-4 py-3 text-gray-900">{student.category}</td>
+                        <td className="px-4 py-3 text-gray-900">
+                          {student.category}
+                        </td>
                       </tr>
                       <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
-                          Phone Number
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">{student.phone}</td>
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
                           Nationality
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.nationality}
                         </td>
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                          Aadhar Number
+                        </td>
+                        <td className="px-4 py-3 text-gray-900">
+                          {student.aadharNumber}
+                        </td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
-                          Sub Category
+                          Mobile Number
                         </td>
                         <td className="px-4 py-3 text-gray-900">
-                          {student.subCategory || "Not Applicable"}
+                          {student.phone}
                         </td>
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
-                          Course
+                          Email Address
                         </td>
-                        <td className="px-4 py-3 text-gray-900 font-semibold text-blue-600">
-                          {student.course || "N/A"}
+                        <td className="px-4 py-3 text-gray-900">
+                          {student.email}
                         </td>
                       </tr>
                     </tbody>
@@ -288,168 +339,64 @@ const RegistrationDetails = () => {
                 </div>
               </section>
 
-              {/* EDUCATION DETAILS */}
+              {/* EDUCATIONAL QUALIFICATIONS */}
               <section>
-                <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                <h2 className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
                   EDUCATIONAL QUALIFICATIONS
                 </h2>
-                <div className="border border-gray-300 rounded-b-lg overflow-hidden overflow-x-auto print:border-black print:rounded-none">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-purple-100 to-pink-100 print:bg-gray-200">
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Qualification
-                        </th>
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Board/University
-                        </th>
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Year
-                        </th>
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Marksheet No
-                        </th>
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Roll No
-                        </th>
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Total Marks
-                        </th>
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Obtained
-                        </th>
-                        <th className="px-2 py-3 text-left font-bold text-gray-700 border-b border-gray-300 print:border-black">
-                          Percentage
-                        </th>
-                      </tr>
-                    </thead>
+                <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
+                  <table className="w-full text-sm">
                     <tbody>
-                      {/* 10th */}
-                      <tr className="border-b border-gray-200 hover:bg-blue-50 print:hover:bg-white print:border-black">
-                        <td className="px-2 py-3 font-semibold text-gray-700">
-                          10th Standard
+                      <tr className="border-b border-gray-200 print:border-black">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                          Last Qualification
                         </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.tenthBoard || "-"}
+                        <td className="px-4 py-3 text-gray-900 w-1/4">
+                          {student.lastQualification}
                         </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.tenthYear || "-"}
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                          Board/University
                         </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.tenthMarksheetNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.tenthRollNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.tenthTotalMarks || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.tenthMarksObtained || "-"}
-                        </td>
-                        <td className="px-2 py-3 font-bold text-green-600">
-                          {student.tenthPercentage ? `${student.tenthPercentage}%` : "-"}
+                        <td className="px-4 py-3 text-gray-900 w-1/4">
+                          {student.board}
                         </td>
                       </tr>
-
-                      {/* 12th */}
-                      <tr className="border-b border-gray-200 hover:bg-purple-50 print:hover:bg-white print:border-black">
-                        <td className="px-2 py-3 font-semibold text-gray-700">
-                          12th Standard
+                      <tr className="border-b border-gray-200 print:border-black">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                          Year of Passing
                         </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.twelfthBoard || "-"}
+                        <td className="px-4 py-3 text-gray-900">
+                          {student.passingYear}
                         </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.twelfthYear || "-"}
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                          Marks/Percentage
                         </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.twelfthMarksheetNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.twelfthRollNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.twelfthTotalMarks || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.twelfthMarksObtained || "-"}
-                        </td>
-                        <td className="px-2 py-3 font-bold text-green-600">
-                          {student.twelfthPercentage
-                            ? `${student.twelfthPercentage}%`
-                            : "-"}
+                        <td className="px-4 py-3 text-gray-900">
+                          {student.percentage}%
                         </td>
                       </tr>
-
-                      {/* Graduation */}
-                      <tr className="border-b border-gray-200 hover:bg-green-50 print:hover:bg-white print:border-black">
-                        <td className="px-2 py-3 font-semibold text-gray-700">
-                          Graduation
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.graduationBoard || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.graduationYear || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.graduationMarksheetNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.graduationRollNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.graduationTotalMarks || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.graduationMarksObtained || "-"}
-                        </td>
-                        <td className="px-2 py-3 font-bold text-green-600">
-                          {student.graduationPercentage
-                            ? `${student.graduationPercentage}%`
-                            : "-"}
-                        </td>
-                      </tr>
-
-                      {/* Other */}
-                      <tr className="hover:bg-orange-50 print:hover:bg-white">
-                        <td className="px-2 py-3 font-semibold text-gray-700">
-                          Other
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.otherBoard || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.otherYear || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.otherMarksheetNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.otherRollNo || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.otherTotalMarks || "-"}
-                        </td>
-                        <td className="px-2 py-3 text-gray-900">
-                          {student.otherMarksObtained || "-"}
-                        </td>
-                        <td className="px-2 py-3 font-bold text-green-600">
-                          {student.otherPercentage
-                            ? `${student.otherPercentage}%`
-                            : "-"}
-                        </td>
-                      </tr>
+                      {student.rollNumber && (
+                        <tr>
+                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                            Roll Number
+                          </td>
+                          <td
+                            className="px-4 py-3 text-gray-900"
+                            colSpan={3}
+                          >
+                            {student.rollNumber}
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
               </section>
 
-              {/* COMMUNICATION DETAILS */}
+              {/* ADDRESS */}
               <section>
-                <h2 className="bg-gradient-to-r from-green-600 to-teal-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
-                  COMMUNICATION / CORRESPONDENCE DETAILS
+                <h2 className="bg-gradient-to-r from-pink-600 to-rose-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                  ADDRESS DETAILS
                 </h2>
                 <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
                   <table className="w-full text-sm">
@@ -458,8 +405,25 @@ const RegistrationDetails = () => {
                         <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
                           Address
                         </td>
-                        <td className="px-4 py-3 text-gray-900" colSpan="3">
+                        <td
+                          className="px-4 py-3 text-gray-900"
+                          colSpan={3}
+                        >
                           {student.address}
+                        </td>
+                      </tr>
+                      <tr className="border-b border-gray-200 print:border-black">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                          City
+                        </td>
+                        <td className="px-4 py-3 text-gray-900 w-1/4">
+                          {student.city}
+                        </td>
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                          Tahsil
+                        </td>
+                        <td className="px-4 py-3 text-gray-900 w-1/4">
+                          {student.tahsil}
                         </td>
                       </tr>
                       <tr className="border-b border-gray-200 print:border-black">
