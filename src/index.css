@@ -15,3 +15,46 @@ html, body {
     }
   }
   
+
+/* Print ONLY the registration sheet, as a single A4 page */
+@media print {
+  /* basic cleanup */
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* show ONLY the registration sheet */
+  #registration-print,
+  #registration-print * {
+    visibility: visible;
+  }
+
+  /* position the sheet alone on the page */
+  #registration-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 190mm;          /* content width inside A4 */
+    margin: 0 auto;
+  }
+
+  /* hide print button etc. */
+  .no-print {
+    display: none !important;
+  }
+
+  /* force A4 portrait, small margins */
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+}
