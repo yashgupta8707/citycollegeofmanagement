@@ -13,13 +13,14 @@ import {
 } from "react-icons/fa";
 import { useReactToPrint } from "react-to-print";
 
-const API_BASE = "https://clc-backend-0isa.onrender.com"; // Update with your production URL
+const API_BASE = "https://clc-backend-0isa.onrender.com";
 
 const RegistrationDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
   const printRef = useRef(null);
 
   // Fetch student from backend using ID
@@ -40,17 +41,86 @@ const RegistrationDetails = () => {
     fetchStudent();
   }, [id, navigate]);
 
-  // Print handler - UPDATED API
+  // Wait for images to load before printing
+  useEffect(() => {
+    if (student) {
+      const photoUrl = student.documents?.photo ? `${API_BASE}${student.documents.photo}` : null;
+      const signatureUrl = student.documents?.signature ? `${API_BASE}${student.documents.signature}` : null;
+
+      const loadImage = (url) => {
+        return new Promise((resolve) => {
+          if (!url) {
+            resolve();
+            return;
+          }
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Resolve even on error to continue
+          img.src = url;
+        });
+      };
+
+      Promise.all([
+        loadImage(photoUrl),
+        loadImage(signatureUrl),
+        loadImage('/logo.jpeg'),
+        loadImage('/lucknow-university-logo.png')
+      ]).then(() => {
+        setImagesLoaded(true);
+      });
+    }
+  }, [student]);
+
+  // Print handler with image loading check
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Registration_${student?.registrationNo || id}`,
-    onAfterPrint: () => toast.success("Document printed successfully!"),
+    onBeforePrint: () => {
+      return new Promise((resolve) => {
+        if (!imagesLoaded) {
+          toast.warning("Loading images... Please wait.");
+          setTimeout(resolve, 2000);
+        } else {
+          resolve();
+        }
+      });
+    },
+    onAfterPrint: () => {
+      toast.success("Document printed successfully!");
+    },
+    onPrintError: (error) => {
+      console.error("Print error:", error);
+      toast.error("Failed to print document");
+    },
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        * {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    `
   });
 
-  // Download as PDF (using print dialog)
+  // Download as PDF
   const handleDownload = () => {
+    if (!imagesLoaded) {
+      toast.warning("Loading images... Please try again in a moment.");
+      return;
+    }
     toast.info("Please use 'Save as PDF' option in the print dialog.");
-    handlePrint();
+    setTimeout(() => {
+      handlePrint();
+    }, 500);
   };
 
   if (loading) {
@@ -133,17 +203,19 @@ const RegistrationDetails = () => {
         <div className="bg-white rounded-xl shadow-md p-4 flex flex-wrap gap-3 justify-center">
           <button
             onClick={handleDownload}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg"
+            disabled={!imagesLoaded}
+            className={`bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg ${!imagesLoaded ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <FaDownload />
-            Download PDF
+            {imagesLoaded ? 'Download PDF' : 'Loading...'}
           </button>
           <button
             onClick={handlePrint}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg"
+            disabled={!imagesLoaded}
+            className={`bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg ${!imagesLoaded ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <FaPrint />
-            Print Form
+            {imagesLoaded ? 'Print Form' : 'Loading...'}
           </button>
           <button
             onClick={() => navigate("/")}
@@ -162,59 +234,57 @@ const RegistrationDetails = () => {
         transition={{ delay: 0.3 }}
         className="max-w-4xl mx-auto"
       >
-        <div className="bg-white rounded-xl shadow-2xl overflow-hidden print:shadow-none print:rounded-none">
+        <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
           {/* Print Content */}
-          <div ref={printRef} className="print:p-0">
+          <div ref={printRef} className="bg-white p-8">
             {/* HEADER */}
-            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-b-4 border-yellow-600 px-6 py-6 print:bg-white print:border-black print:border-b-2">
+            <div className="border-b-4 border-yellow-600 pb-6 mb-6">
               <div className="flex items-center justify-between gap-4">
                 <img
                   src="/logo.jpeg"
                   alt="College Logo"
                   className="h-20 w-20 object-contain flex-shrink-0"
+                  crossOrigin="anonymous"
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}
                 />
                 <div className="flex-1 text-center">
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-700 leading-tight mb-1">
+                  <h1 className="text-3xl font-extrabold text-yellow-700 leading-tight mb-1">
                     CITY COLLEGE OF MANAGEMENT
                   </h1>
-                  <p className="text-base sm:text-lg text-yellow-600 font-semibold">
+                  <p className="text-lg text-yellow-600 font-semibold">
                     (Under DCRUST University, Murthal)
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                    Sector M, Nishatganj, Lucknow-226006 | Phone: +91-0522
-                    4064545, 4064546, 4029550
+                  <p className="text-sm text-gray-600 mt-1">
+                    Sector M, Nishatganj, Lucknow-226006 | Phone: +91-0522 4064545, 4064546, 4029550
                   </p>
                 </div>
                 <img
                   src="/lucknow-university-logo.png"
                   alt="Lucknow University Logo"
                   className="h-20 w-20 object-contain flex-shrink-0"
+                  crossOrigin="anonymous"
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}
                 />
               </div>
 
-              <div className="mt-4 text-center bg-gradient-to-r from-yellow-600 to-amber-600 text-white py-2 rounded-lg font-bold text-lg print:bg-gray-800">
+              <div className="mt-4 text-center bg-yellow-600 text-white py-2 rounded-lg font-bold text-lg">
                 REGISTRATION FORM
               </div>
             </div>
 
-            {/* CONTENT - Compact Spacing */}
-            <div className="p-6 space-y-4 print:space-y-3 print:p-4">
+            {/* CONTENT */}
+            <div className="space-y-6">
               {/* REGISTRATION INFO & BARCODE */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-3 border-b-2 border-gray-300 print:border-black">
+              <div className="flex items-center justify-between border-b-2 border-gray-300 pb-4">
                 <div>
                   <h2 className="text-lg font-bold text-gray-800">
-                    Registration No:{" "}
-                    <span className="text-blue-600">{regNo}</span>
+                    Registration No: <span className="text-blue-600">{regNo}</span>
                   </h2>
-                  <p className="text-xs text-gray-600 mt-1">
-                    Date: {submissionDate}
-                  </p>
+                  <p className="text-xs text-gray-600 mt-1">Date: {submissionDate}</p>
                 </div>
                 <div className="flex-shrink-0">
                   <Barcode
@@ -229,14 +299,14 @@ const RegistrationDetails = () => {
 
               {/* COURSE SELECTION */}
               <section>
-                <h2 className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                <h2 className="bg-blue-600 text-white text-sm font-bold px-4 py-2 mb-2">
                   COURSE SELECTION
                 </h2>
-                <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
+                <div className="border border-gray-300">
                   <table className="w-full text-sm">
                     <tbody>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           Course
                         </td>
                         <td className="px-4 py-3 text-gray-900 font-medium">
@@ -245,7 +315,7 @@ const RegistrationDetails = () => {
                       </tr>
                       {student.specialization && (
                         <tr>
-                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                             Specialization
                           </td>
                           <td className="px-4 py-3 text-gray-900">
@@ -260,60 +330,60 @@ const RegistrationDetails = () => {
 
               {/* STUDENT DETAILS */}
               <section>
-                <h2 className="bg-gradient-to-r from-green-600 to-teal-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                <h2 className="bg-green-600 text-white text-sm font-bold px-4 py-2 mb-2">
                   STUDENT DETAILS
                 </h2>
-                <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
+                <div className="border border-gray-300">
                   <table className="w-full text-sm">
                     <tbody>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           Full Name
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4 font-medium">
                           {student.fullName || student.studentName}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           Father's Name
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4">
                           {student.fatherName}
                         </td>
                       </tr>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Mother's Name
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.motherName}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Date of Birth
                         </td>
                         <td className="px-4 py-3 text-gray-900">{dob}</td>
                       </tr>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Gender
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.gender}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Category
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.category}
                         </td>
                       </tr>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Nationality
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.nationality}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Aadhar Number
                         </td>
                         <td className="px-4 py-3 text-gray-900">
@@ -321,13 +391,13 @@ const RegistrationDetails = () => {
                         </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Mobile Number
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.phone}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Email Address
                         </td>
                         <td className="px-4 py-3 text-gray-900">
@@ -341,34 +411,34 @@ const RegistrationDetails = () => {
 
               {/* EDUCATIONAL QUALIFICATIONS */}
               <section>
-                <h2 className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                <h2 className="bg-purple-600 text-white text-sm font-bold px-4 py-2 mb-2">
                   EDUCATIONAL QUALIFICATIONS
                 </h2>
-                <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
+                <div className="border border-gray-300">
                   <table className="w-full text-sm">
                     <tbody>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           Last Qualification
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4">
                           {student.lastQualification}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           Board/University
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4">
                           {student.board}
                         </td>
                       </tr>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Year of Passing
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.passingYear}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Marks/Percentage
                         </td>
                         <td className="px-4 py-3 text-gray-900">
@@ -377,13 +447,10 @@ const RegistrationDetails = () => {
                       </tr>
                       {student.rollNumber && (
                         <tr>
-                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                             Roll Number
                           </td>
-                          <td
-                            className="px-4 py-3 text-gray-900"
-                            colSpan={3}
-                          >
+                          <td className="px-4 py-3 text-gray-900" colSpan={3}>
                             {student.rollNumber}
                           </td>
                         </tr>
@@ -395,45 +462,42 @@ const RegistrationDetails = () => {
 
               {/* ADDRESS */}
               <section>
-                <h2 className="bg-gradient-to-r from-pink-600 to-rose-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                <h2 className="bg-pink-600 text-white text-sm font-bold px-4 py-2 mb-2">
                   ADDRESS DETAILS
                 </h2>
-                <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
+                <div className="border border-gray-300">
                   <table className="w-full text-sm">
                     <tbody>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           Address
                         </td>
-                        <td
-                          className="px-4 py-3 text-gray-900"
-                          colSpan={3}
-                        >
+                        <td className="px-4 py-3 text-gray-900" colSpan={3}>
                           {student.address}
                         </td>
                       </tr>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           City
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4">
                           {student.city}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           Tahsil
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4">
                           {student.tahsil}
                         </td>
                       </tr>
-                      <tr className="border-b border-gray-200 print:border-black">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           District
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4">
                           {student.district}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
                           State
                         </td>
                         <td className="px-4 py-3 text-gray-900 w-1/4">
@@ -441,13 +505,13 @@ const RegistrationDetails = () => {
                         </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Pin Code
                         </td>
                         <td className="px-4 py-3 text-gray-900">
                           {student.pincode}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 print:bg-gray-100">
+                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
                           Email ID
                         </td>
                         <td className="px-4 py-3 text-gray-900">{student.email}</td>
@@ -459,24 +523,24 @@ const RegistrationDetails = () => {
 
               {/* DOCUMENTS UPLOADED */}
               <section>
-                <h2 className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                <h2 className="bg-orange-600 text-white text-sm font-bold px-4 py-2 mb-2">
                   DOCUMENTS UPLOADED
                 </h2>
-                <div className="border border-gray-300 rounded-b-lg overflow-hidden print:border-black print:rounded-none">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6">
+                <div className="border border-gray-300 p-6">
+                  <div className="grid grid-cols-2 gap-6">
                     <div className="text-center">
                       <h3 className="font-semibold text-gray-700 mb-3 text-sm">
                         Photograph
                       </h3>
-                      <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center min-h-[200px] print:border-black print:border-solid">
+                      <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-4 flex items-center justify-center min-h-[200px]">
                         {photoUrl ? (
                           <img
                             src={photoUrl}
                             alt="Student Photograph"
                             className="max-h-48 max-w-full object-contain rounded"
+                            crossOrigin="anonymous"
                             onError={(e) => {
-                              e.target.style.display = "none";
-                              e.target.nextSibling.style.display = "block";
+                              e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">No Photo</text></svg>';
                             }}
                           />
                         ) : (
@@ -484,12 +548,6 @@ const RegistrationDetails = () => {
                             No photo uploaded
                           </span>
                         )}
-                        <span
-                          className="text-gray-400 text-sm hidden"
-                          style={{ display: "none" }}
-                        >
-                          Photo not available
-                        </span>
                       </div>
                     </div>
 
@@ -497,15 +555,15 @@ const RegistrationDetails = () => {
                       <h3 className="font-semibold text-gray-700 mb-3 text-sm">
                         Signature
                       </h3>
-                      <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center min-h-[200px] print:border-black print:border-solid">
+                      <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-4 flex items-center justify-center min-h-[200px]">
                         {signatureUrl ? (
                           <img
                             src={signatureUrl}
                             alt="Student Signature"
                             className="max-h-48 max-w-full object-contain rounded"
+                            crossOrigin="anonymous"
                             onError={(e) => {
-                              e.target.style.display = "none";
-                              e.target.nextSibling.style.display = "block";
+                              e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">No Signature</text></svg>';
                             }}
                           />
                         ) : (
@@ -513,12 +571,6 @@ const RegistrationDetails = () => {
                             No signature uploaded
                           </span>
                         )}
-                        <span
-                          className="text-gray-400 text-sm hidden"
-                          style={{ display: "none" }}
-                        >
-                          Signature not available
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -527,10 +579,10 @@ const RegistrationDetails = () => {
 
               {/* DECLARATION */}
               <section>
-                <h2 className="bg-gradient-to-r from-gray-700 to-gray-800 text-white text-sm font-bold px-4 py-2 rounded-t-lg print:bg-gray-800 print:rounded-none">
+                <h2 className="bg-gray-700 text-white text-sm font-bold px-4 py-2 mb-2">
                   DECLARATION
                 </h2>
-                <div className="border border-gray-300 rounded-b-lg p-6 bg-amber-50 print:border-black print:rounded-none print:bg-white">
+                <div className="border border-gray-300 p-6">
                   <p className="text-xs leading-relaxed text-gray-700 mb-4">
                     मैं प्रमाणित करता हूँ कि ऑनलाइन आवेदन में भरी गयी समस्त
                     प्रविष्टियाँ मेरे पास उपलब्ध अभिलेखों पर आधारित हैं एवं मेरे
@@ -545,7 +597,7 @@ const RegistrationDetails = () => {
                     वैधानिक कार्यवाही करने का पूर्ण अधिकार होगा।
                   </p>
 
-                  <div className="flex items-center gap-3 p-3 bg-white rounded border border-amber-200">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded border border-gray-200">
                     <FaCheckCircle className="text-green-600 text-xl" />
                     <span className="font-semibold text-gray-800 text-sm">
                       Student Confirmation: I agree to the above declaration
@@ -555,7 +607,7 @@ const RegistrationDetails = () => {
               </section>
 
               {/* FOOTER - Dates */}
-              <div className="flex flex-col sm:flex-row justify-between gap-2 text-xs text-gray-600 pt-4 border-t border-gray-300 print:border-black">
+              <div className="flex justify-between text-xs text-gray-600 pt-4 border-t border-gray-300">
                 <span>
                   <strong>Submission Date:</strong> {submissionDate}
                 </span>
@@ -585,17 +637,19 @@ const RegistrationDetails = () => {
               <div className="flex gap-3">
                 <button
                   onClick={handleDownload}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300"
+                  disabled={!imagesLoaded}
+                  className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 ${!imagesLoaded ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <FaDownload />
-                  Download
+                  {imagesLoaded ? 'Download' : 'Loading...'}
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300"
+                  disabled={!imagesLoaded}
+                  className={`bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 ${!imagesLoaded ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <FaPrint />
-                  Print
+                  {imagesLoaded ? 'Print' : 'Loading...'}
                 </button>
               </div>
             </div>
