@@ -9,6 +9,7 @@ import About from './pages/About';
 import Courses from './pages/Courses';
 import Contact from './pages/Contact';
 import Registration from './pages/Registration';
+import RegistrationDetails from './pages/RegistrationDetails';
 
 // Admin pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -53,6 +54,7 @@ function App() {
         <Route path="/courses" element={<Courses />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/registration" element={<Registration />} />
+        <Route path="/registration-details/:id" element={<RegistrationDetails />} />
         <Route path="/founder-message" element={<Founder />} />
         <Route path="/director-message" element={<Director />} />
         
