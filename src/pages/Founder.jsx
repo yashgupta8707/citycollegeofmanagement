@@ -64,7 +64,7 @@ const Founder = () => {
               <div className="lg:col-span-1">
                 <div className="bg-gradient-to-br from-primary-600 to-primary-800 p-1 rounded-lg">
                   <img
-                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400"
+                    src="/founder.jpg"
                     alt="Mr. M. M. Srivastava"
                     className="w-full rounded-lg"
                   />

@@ -64,7 +64,7 @@ const About = () => {
               viewport={{ once: true }}
             >
               <img
-                src="https://images.unsplash.com/photo-1562774053-701939374585?w=800"
+                src="/hero1.png"
                 alt="College Building"
                 className="rounded-xl shadow-2xl"
               />
@@ -153,7 +153,7 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 gradient-bg text-white text-center">
+      <section className="py-20 gradient-bg text-black text-center">
         <div className="container mx-auto px-4 md:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -163,7 +163,7 @@ const About = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Join Us?</h2>
             <p className="text-xl mb-8 opacity-90">Start your journey to success today</p>
-            <a href="/registration" className="btn-secondary bg-white text-primary-900 hover:bg-gray-100">
+            <a href="/registration" className="btn-secondary bg-yellow-500 p-2 border-amber-300 rounded-2xl text-primary-900 hover:bg-gray-100">
               Apply Now
             </a>
           </motion.div>

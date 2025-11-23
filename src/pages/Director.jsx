@@ -64,7 +64,7 @@ const Director = () => {
               <div className="lg:col-span-1">
                 <div className="bg-gradient-to-br from-secondary-500 to-secondary-600 p-1 rounded-lg">
                   <img
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400"
+                    src="/director.jpg"
                     alt="Dr. Mamta Srivastava"
                     className="w-full rounded-lg"
                   />

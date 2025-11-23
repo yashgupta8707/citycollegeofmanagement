@@ -9,52 +9,84 @@ html, body {
   margin: 0;
   padding: 0;
 }
-@media (max-width: 640px) {
-    .fixed {
-      bottom: 20px; 
-    }
-  }
-  
 
-/* Print ONLY the registration sheet, as a single A4 page */
+/* existing mobile tweak */
+@media (max-width: 640px) {
+  .fixed {
+    bottom: 20px;
+  }
+}
+
+/* === PRINT STYLES FOR REGISTRATION FORM (single A4 page) === */
 @media print {
-  /* basic cleanup */
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
   html,
   body {
-    margin: 0;
     padding: 0;
+    margin: 0;
+    background: #ffffff !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* hide everything by default */
+  /* Hide everything by default */
   body * {
-    visibility: hidden;
+    visibility: hidden !important;
   }
 
-  /* show ONLY the registration sheet */
-  #registration-print,
-  #registration-print * {
-    visibility: visible;
+  /* Show only the print area */
+  #print-area,
+  #print-area * {
+    visibility: visible !important;
   }
 
-  /* position the sheet alone on the page */
-  #registration-print {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 190mm;          /* content width inside A4 */
-    margin: 0 auto;
+  /* Make the print area behave like a flat page */
+  #print-area {
+    position: static !important;
+    inset: 0 !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
   }
+}
 
-  /* hide print button etc. */
-  .no-print {
-    display: none !important;
-  }
+/* ==== Registration sheet palette + table (match fixed PDF style) ==== */
 
-  /* force A4 portrait, small margins */
-  @page {
-    size: A4 portrait;
-    margin: 10mm;
-  }
+/* whole printed sheet */
+.registration-sheet {
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1f2933;              /* dark slate text */
+  font-size: 13px;
+}
+
+/* education table (exact, clean tabular look) */
+.reg-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.reg-table thead th {
+  background-color: #e8f2ff;   /* soft blue header */
+  color: #12365b;              /* deep blue text */
+  border: 1px solid #b4c7e7;   /* light blue border */
+  padding: 6px 8px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.reg-table tbody td {
+  border: 1px solid #b4c7e7;
+  padding: 6px 8px;
+}
+
+/* very subtle row striping */
+.reg-table tbody tr:nth-child(even) td {
+  background-color: #f9fbff;
 }

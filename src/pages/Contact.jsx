@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaPaperPlane } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const Contact = () => {
   useEffect(() => {
@@ -15,6 +16,7 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,13 +24,29 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success('Message sent successfully! We will contact you soon.');
-    setFormData({ fullName: '', email: '', phone: '', subject: '', message: '' });
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/contact/submit`,
+        formData
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message || 'Message sent successfully! We will contact you soon.');
+        setFormData({ fullName: '', email: '', phone: '', subject: '', message: '' });
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
-      <section className="relative h-[400px] flex items-center gradient-bg">
+      {/* <section className="relative h-[400px] flex items-center gradient-bg">
         <motion.div className="container mx-auto px-4 md:px-8 relative z-10 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
@@ -38,7 +56,7 @@ const Contact = () => {
             CONTACT US
           </motion.h1>
         </motion.div>
-      </section>
+      </section> */}
 
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 md:px-8">
@@ -112,6 +130,7 @@ const Contact = () => {
                   value={formData.fullName}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="input-field"
                 />
                 <input
@@ -121,6 +140,7 @@ const Contact = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="input-field"
                 />
               </div>
@@ -132,6 +152,7 @@ const Contact = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="input-field"
                 />
                 <input
@@ -141,6 +162,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="input-field"
                 />
               </div>
@@ -150,11 +172,25 @@ const Contact = () => {
                 value={formData.message}
                 onChange={handleChange}
                 required
+                disabled={loading}
                 rows="6"
                 className="textarea-field"
               ></textarea>
-              <button type="submit" className="btn-primary w-full flex items-center justify-center">
-                <FaPaperPlane className="mr-2" /> SEND NOW
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="btn-primary w-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <FaPaperPlane className="mr-2" /> SEND NOW
+                  </>
+                )}
               </button>
             </motion.form>
 

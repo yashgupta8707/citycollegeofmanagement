@@ -55,7 +55,7 @@ const RegistrationDetails = () => {
           }
           const img = new Image();
           img.onload = () => resolve();
-          img.onerror = () => resolve(); // Resolve even on error to continue
+          img.onerror = () => resolve();
           img.src = url;
         });
       };
@@ -63,15 +63,13 @@ const RegistrationDetails = () => {
       Promise.all([
         loadImage(photoUrl),
         loadImage(signatureUrl),
-        loadImage('/logo.jpeg'),
-        loadImage('/lucknow-university-logo.png')
       ]).then(() => {
-        setImagesLoaded(true);
+        setTimeout(() => setImagesLoaded(true), 500);
       });
     }
   }, [student]);
 
-  // Print handler with image loading check
+  // Print handler with proper page styles
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Registration_${student?.registrationNo || id}`,
@@ -79,7 +77,7 @@ const RegistrationDetails = () => {
       return new Promise((resolve) => {
         if (!imagesLoaded) {
           toast.warning("Loading images... Please wait.");
-          setTimeout(resolve, 2000);
+          setTimeout(resolve, 1000);
         } else {
           resolve();
         }
@@ -88,24 +86,25 @@ const RegistrationDetails = () => {
     onAfterPrint: () => {
       toast.success("Document printed successfully!");
     },
-    onPrintError: (error) => {
-      console.error("Print error:", error);
-      toast.error("Failed to print document");
-    },
     pageStyle: `
       @page {
         size: A4;
-        margin: 10mm;
+        margin: 15mm;
       }
       @media print {
         body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-          color-adjust: exact;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
         }
         * {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
         }
       }
     `
@@ -180,7 +179,7 @@ const RegistrationDetails = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto mb-6"
+        className="max-w-5xl mx-auto mb-6 print:hidden"
       >
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl shadow-lg p-6 flex items-center gap-4">
           <FaCheckCircle className="text-5xl flex-shrink-0" />
@@ -198,7 +197,7 @@ const RegistrationDetails = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="max-w-4xl mx-auto mb-6 print:hidden"
+        className="max-w-5xl mx-auto mb-6 print:hidden"
       >
         <div className="bg-white rounded-xl shadow-md p-4 flex flex-wrap gap-3 justify-center">
           <button
@@ -232,38 +231,39 @@ const RegistrationDetails = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="max-w-4xl mx-auto"
+        className="max-w-5xl mx-auto"
       >
-        <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-          {/* Print Content */}
-          <div ref={printRef} className="bg-white p-8">
-            {/* HEADER */}
-            <div className="border-b-4 border-yellow-600 pb-6 mb-6">
-              <div className="flex items-center justify-between gap-4">
+        <div className="bg-white rounded-xl shadow-2xl overflow-hidden print:shadow-none print:rounded-none">
+          {/* Print Content - SINGLE PAGE LAYOUT */}
+          <div ref={printRef} className="bg-white p-6" style={{ fontSize: '11px' }}>
+            
+            {/* HEADER - Compact */}
+            <div className="border-b-3 border-yellow-600 pb-3 mb-3" style={{ borderBottomWidth: '3px', borderBottomColor: '#d97706' }}>
+              <div className="flex items-start justify-between gap-3">
                 <img
-                  src="/logo.jpeg"
+                  src="/logo.png"
                   alt="College Logo"
-                  className="h-20 w-20 object-contain flex-shrink-0"
+                  className="h-16 w-16 object-contain flex-shrink-0"
                   crossOrigin="anonymous"
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}
                 />
                 <div className="flex-1 text-center">
-                  <h1 className="text-3xl font-extrabold text-yellow-700 leading-tight mb-1">
+                  <h1 className="text-xl font-extrabold text-yellow-700 leading-tight mb-0.5" style={{ color: '#b45309' }}>
                     CITY COLLEGE OF MANAGEMENT
                   </h1>
-                  <p className="text-lg text-yellow-600 font-semibold">
+                  <p className="text-xs text-yellow-600 font-semibold" style={{ color: '#d97706' }}>
                     (Under DCRUST University, Murthal)
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-xs text-gray-600 mt-0.5" style={{ fontSize: '10px' }}>
                     Sector M, Nishatganj, Lucknow-226006 | Phone: +91-0522 4064545, 4064546, 4029550
                   </p>
                 </div>
                 <img
                   src="/lucknow-university-logo.png"
-                  alt="Lucknow University Logo"
-                  className="h-20 w-20 object-contain flex-shrink-0"
+                  alt="University Logo"
+                  className="h-16 w-16 object-contain flex-shrink-0"
                   crossOrigin="anonymous"
                   onError={(e) => {
                     e.target.style.display = "none";
@@ -271,351 +271,231 @@ const RegistrationDetails = () => {
                 />
               </div>
 
-              <div className="mt-4 text-center bg-yellow-600 text-white py-2 rounded-lg font-bold text-lg">
+              <div className="mt-2 text-center bg-yellow-600 text-white py-1.5 rounded font-bold text-sm" style={{ backgroundColor: '#d97706' }}>
                 REGISTRATION FORM
               </div>
             </div>
 
-            {/* CONTENT */}
-            <div className="space-y-6">
-              {/* REGISTRATION INFO & BARCODE */}
-              <div className="flex items-center justify-between border-b-2 border-gray-300 pb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-gray-800">
-                    Registration No: <span className="text-blue-600">{regNo}</span>
-                  </h2>
-                  <p className="text-xs text-gray-600 mt-1">Date: {submissionDate}</p>
+            {/* Main Content Grid - 2 Columns Layout */}
+            <div className="grid grid-cols-3 gap-4">
+              
+              {/* LEFT COLUMN - 2/3 width */}
+              <div className="col-span-2 space-y-3">
+                
+                {/* REGISTRATION INFO & BARCODE */}
+                <div className="flex items-center justify-between border-b border-gray-300 pb-2">
+                  <div>
+                    <h2 className="text-sm font-bold text-gray-800">
+                      Registration No: <span className="text-blue-600">{regNo}</span>
+                    </h2>
+                    <p className="text-xs text-gray-600 mt-0.5">Date: {submissionDate}</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <Barcode
+                      value={regNo}
+                      width={1.2}
+                      height={30}
+                      fontSize={10}
+                      margin={2}
+                    />
+                  </div>
                 </div>
-                <div className="flex-shrink-0">
-                  <Barcode
-                    value={regNo}
-                    width={1.5}
-                    height={40}
-                    fontSize={12}
-                    margin={5}
-                  />
-                </div>
+
+                {/* COURSE SELECTION */}
+                <section>
+                  <h3 className="bg-blue-600 text-white text-xs font-bold px-2 py-1 mb-1" style={{ backgroundColor: '#2563eb' }}>
+                    COURSE SELECTION
+                  </h3>
+                  <div className="border border-gray-300">
+                    <table className="w-full" style={{ fontSize: '10px' }}>
+                      <tbody>
+                        <tr>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/3">
+                            Course
+                          </td>
+                          <td className="px-2 py-1.5 text-gray-900 font-medium" colSpan={3}>
+                            {student.course}
+                            {student.specialization && ` - ${student.specialization}`}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                {/* STUDENT DETAILS */}
+                <section>
+                  <h3 className="bg-green-600 text-white text-xs font-bold px-2 py-1 mb-1" style={{ backgroundColor: '#16a34a' }}>
+                    STUDENT DETAILS
+                  </h3>
+                  <div className="border border-gray-300">
+                    <table className="w-full" style={{ fontSize: '10px' }}>
+                      <tbody>
+                        <tr className="border-b border-gray-200">
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/4">Full Name</td>
+                          <td className="px-2 py-1.5 text-gray-900 w-1/4 font-medium">{student.fullName || student.studentName}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/4">Father's Name</td>
+                          <td className="px-2 py-1.5 text-gray-900 w-1/4">{student.fatherName}</td>
+                        </tr>
+                        <tr className="border-b border-gray-200">
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Mother's Name</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.motherName}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Date of Birth</td>
+                          <td className="px-2 py-1.5 text-gray-900">{dob}</td>
+                        </tr>
+                        <tr className="border-b border-gray-200">
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Gender</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.gender}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Category</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.category}</td>
+                        </tr>
+                        <tr className="border-b border-gray-200">
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Nationality</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.nationality}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Aadhar Number</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.aadharNumber || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Mobile Number</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.phone}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Email</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.email}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                {/* EDUCATIONAL QUALIFICATIONS */}
+                <section>
+                  <h3 className="bg-purple-600 text-white text-xs font-bold px-2 py-1 mb-1" style={{ backgroundColor: '#9333ea' }}>
+                    EDUCATIONAL QUALIFICATIONS
+                  </h3>
+                  <div className="border border-gray-300">
+                    <table className="w-full" style={{ fontSize: '10px' }}>
+                      <tbody>
+                        <tr className="border-b border-gray-200">
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/4">Last Qualification</td>
+                          <td className="px-2 py-1.5 text-gray-900 w-1/4">{student.lastQualification || 'N/A'}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/4">Board/University</td>
+                          <td className="px-2 py-1.5 text-gray-900 w-1/4">{student.board || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Year of Passing</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.passingYear || 'N/A'}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">Marks/Percentage</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.percentage ? `${student.percentage}%` : 'N/A'}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                {/* ADDRESS DETAILS */}
+                <section>
+                  <h3 className="bg-pink-600 text-white text-xs font-bold px-2 py-1 mb-1" style={{ backgroundColor: '#db2777' }}>
+                    ADDRESS DETAILS
+                  </h3>
+                  <div className="border border-gray-300">
+                    <table className="w-full" style={{ fontSize: '10px' }}>
+                      <tbody>
+                        <tr className="border-b border-gray-200">
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/4">Address</td>
+                          <td className="px-2 py-1.5 text-gray-900" colSpan={3}>{student.address}</td>
+                        </tr>
+                        <tr className="border-b border-gray-200">
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/4">City</td>
+                          <td className="px-2 py-1.5 text-gray-900 w-1/4">{student.city}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50 w-1/4">Tahsil</td>
+                          <td className="px-2 py-1.5 text-gray-900 w-1/4">{student.tahsil || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">District</td>
+                          <td className="px-2 py-1.5 text-gray-900">{student.district}</td>
+                          <td className="px-2 py-1.5 font-semibold text-gray-700 bg-gray-50">State</td>
+                          <td className="px-2 py-1.5 text-gray-900">{displayState}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
               </div>
 
-              {/* COURSE SELECTION */}
-              <section>
-                <h2 className="bg-blue-600 text-white text-sm font-bold px-4 py-2 mb-2">
-                  COURSE SELECTION
-                </h2>
-                <div className="border border-gray-300">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          Course
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 font-medium">
-                          {student.course}
-                        </td>
-                      </tr>
-                      {student.specialization && (
-                        <tr>
-                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                            Specialization
-                          </td>
-                          <td className="px-4 py-3 text-gray-900">
-                            {student.specialization}
-                          </td>
-                        </tr>
+              {/* RIGHT COLUMN - 1/3 width for Documents */}
+              <div className="col-span-1 space-y-3">
+                <section>
+                  <h3 className="bg-orange-600 text-white text-xs font-bold px-2 py-1 mb-1" style={{ backgroundColor: '#ea580c' }}>
+                    DOCUMENTS
+                  </h3>
+                  
+                  {/* Photo */}
+                  <div className="border border-gray-300 p-2 mb-2">
+                    <p className="text-xs font-semibold text-gray-700 mb-1 text-center">Photograph</p>
+                    <div className="bg-gray-100 border border-gray-300 flex items-center justify-center" style={{ height: '140px' }}>
+                      {photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt="Photo"
+                          className="max-h-full max-w-full object-contain"
+                          crossOrigin="anonymous"
+                          onError={(e) => {
+                            e.target.parentElement.innerHTML = '<span class="text-gray-400 text-xs">No Photo</span>';
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-xs">No Photo</span>
                       )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              {/* STUDENT DETAILS */}
-              <section>
-                <h2 className="bg-green-600 text-white text-sm font-bold px-4 py-2 mb-2">
-                  STUDENT DETAILS
-                </h2>
-                <div className="border border-gray-300">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          Full Name
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4 font-medium">
-                          {student.fullName || student.studentName}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          Father's Name
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {student.fatherName}
-                        </td>
-                      </tr>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Mother's Name
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.motherName}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Date of Birth
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">{dob}</td>
-                      </tr>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Gender
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.gender}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Category
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.category}
-                        </td>
-                      </tr>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Nationality
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.nationality}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Aadhar Number
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.aadharNumber}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Mobile Number
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.phone}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Email Address
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.email}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              {/* EDUCATIONAL QUALIFICATIONS */}
-              <section>
-                <h2 className="bg-purple-600 text-white text-sm font-bold px-4 py-2 mb-2">
-                  EDUCATIONAL QUALIFICATIONS
-                </h2>
-                <div className="border border-gray-300">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          Last Qualification
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {student.lastQualification}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          Board/University
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {student.board}
-                        </td>
-                      </tr>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Year of Passing
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.passingYear}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Marks/Percentage
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.percentage}%
-                        </td>
-                      </tr>
-                      {student.rollNumber && (
-                        <tr>
-                          <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                            Roll Number
-                          </td>
-                          <td className="px-4 py-3 text-gray-900" colSpan={3}>
-                            {student.rollNumber}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              {/* ADDRESS */}
-              <section>
-                <h2 className="bg-pink-600 text-white text-sm font-bold px-4 py-2 mb-2">
-                  ADDRESS DETAILS
-                </h2>
-                <div className="border border-gray-300">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          Address
-                        </td>
-                        <td className="px-4 py-3 text-gray-900" colSpan={3}>
-                          {student.address}
-                        </td>
-                      </tr>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          City
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {student.city}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          Tahsil
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {student.tahsil}
-                        </td>
-                      </tr>
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          District
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {student.district}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50 w-1/4">
-                          State
-                        </td>
-                        <td className="px-4 py-3 text-gray-900 w-1/4">
-                          {displayState}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Pin Code
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">
-                          {student.pincode}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-gray-700 bg-gray-50">
-                          Email ID
-                        </td>
-                        <td className="px-4 py-3 text-gray-900">{student.email}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              {/* DOCUMENTS UPLOADED */}
-              <section>
-                <h2 className="bg-orange-600 text-white text-sm font-bold px-4 py-2 mb-2">
-                  DOCUMENTS UPLOADED
-                </h2>
-                <div className="border border-gray-300 p-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="text-center">
-                      <h3 className="font-semibold text-gray-700 mb-3 text-sm">
-                        Photograph
-                      </h3>
-                      <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-4 flex items-center justify-center min-h-[200px]">
-                        {photoUrl ? (
-                          <img
-                            src={photoUrl}
-                            alt="Student Photograph"
-                            className="max-h-48 max-w-full object-contain rounded"
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">No Photo</text></svg>';
-                            }}
-                          />
-                        ) : (
-                          <span className="text-gray-400 text-sm">
-                            No photo uploaded
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <h3 className="font-semibold text-gray-700 mb-3 text-sm">
-                        Signature
-                      </h3>
-                      <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-4 flex items-center justify-center min-h-[200px]">
-                        {signatureUrl ? (
-                          <img
-                            src={signatureUrl}
-                            alt="Student Signature"
-                            className="max-h-48 max-w-full object-contain rounded"
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">No Signature</text></svg>';
-                            }}
-                          />
-                        ) : (
-                          <span className="text-gray-400 text-sm">
-                            No signature uploaded
-                          </span>
-                        )}
-                      </div>
                     </div>
                   </div>
-                </div>
-              </section>
 
-              {/* DECLARATION */}
-              <section>
-                <h2 className="bg-gray-700 text-white text-sm font-bold px-4 py-2 mb-2">
-                  DECLARATION
-                </h2>
-                <div className="border border-gray-300 p-6">
-                  <p className="text-xs leading-relaxed text-gray-700 mb-4">
-                    मैं प्रमाणित करता हूँ कि ऑनलाइन आवेदन में भरी गयी समस्त
-                    प्रविष्टियाँ मेरे पास उपलब्ध अभिलेखों पर आधारित हैं एवं मेरे
-                    व्यक्तिगत जानकारी में सही एवं सत्य हैं। आवेदन करने की तिथि को
-                    मेरे पास ऑनलाइन आवेदन में उल्लिखित समस्त अंकों के प्रमाण पत्र,
-                    आरक्षण एवं विशेष आरक्षण सम्बन्धी प्रमाण पत्र उपलब्ध हैं।
-                    ऑनलाइन आवेदन पत्र में अपलोड की गयी मेरी फोटो एवं हस्ताक्षर
-                    स्पष्ट एवं दिये गये निर्देशानुसार हैं। यदि किसी भी स्तर पर
-                    जांचोपरांत ऑनलाइन आवेदन पत्र में कोई भी विवरण त्रुटिपूर्ण /
-                    असत्य पाया जाता है तो उसका समस्त उत्तरदायित्व मेरा होगा एवं
-                    संबंधित अधिकारी को मेरा अभ्यर्थन निरस्त करने तथा मेरे विरुद्ध
-                    वैधानिक कार्यवाही करने का पूर्ण अधिकार होगा।
-                  </p>
-
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded border border-gray-200">
-                    <FaCheckCircle className="text-green-600 text-xl" />
-                    <span className="font-semibold text-gray-800 text-sm">
-                      Student Confirmation: I agree to the above declaration
-                    </span>
+                  {/* Signature */}
+                  <div className="border border-gray-300 p-2">
+                    <p className="text-xs font-semibold text-gray-700 mb-1 text-center">Signature</p>
+                    <div className="bg-gray-100 border border-gray-300 flex items-center justify-center" style={{ height: '80px' }}>
+                      {signatureUrl ? (
+                        <img
+                          src={signatureUrl}
+                          alt="Signature"
+                          className="max-h-full max-w-full object-contain"
+                          crossOrigin="anonymous"
+                          onError={(e) => {
+                            e.target.parentElement.innerHTML = '<span class="text-gray-400 text-xs">No Signature</span>';
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-xs">No Signature</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </section>
-
-              {/* FOOTER - Dates */}
-              <div className="flex justify-between text-xs text-gray-600 pt-4 border-t border-gray-300">
-                <span>
-                  <strong>Submission Date:</strong> {submissionDate}
-                </span>
-                <span>
-                  <strong>Print Date:</strong> {printDate}
-                </span>
+                </section>
               </div>
             </div>
+
+            {/* DECLARATION - Full Width at Bottom */}
+            <section className="mt-3">
+              <h3 className="bg-gray-700 text-white text-xs font-bold px-2 py-1 mb-1" style={{ backgroundColor: '#374151' }}>
+                DECLARATION
+              </h3>
+              <div className="border border-gray-300 p-2">
+                <p className="text-xs leading-relaxed text-gray-700 mb-2" style={{ fontSize: '9px', lineHeight: '1.3' }}>
+                  मैं प्रमाणित करता हूँ कि ऑनलाइन आवेदन में भरी गयी समस्त प्रविष्टियाँ मेरे पास उपलब्ध अभिलेखों पर आधारित हैं एवं मेरे व्यक्तिगत जानकारी में सही एवं सत्य हैं। आवेदन करने की तिथि को मेरे पास ऑनलाइन आवेदन में उल्लिखित समस्त अंकों के प्रमाण पत्र, आरक्षण एवं विशेष आरक्षण सम्बन्धी प्रमाण पत्र उपलब्ध हैं। ऑनलाइन आवेदन पत्र में अपलोड की गयी मेरी फोटो एवं हस्ताक्षर स्पष्ट एवं दिये गये निर्देशानुसार हैं। यदि किसी भी स्तर पर जांचोपरांत ऑनलाइन आवेदन पत्र में कोई भी विवरण त्रुटिपूर्ण / असत्य पाया जाता है तो उसका समस्त उत्तरदायित्व मेरा होगा एवं संबंधित अधिकारी को मेरा अभ्यर्थन निरस्त करने तथा मेरे विरुद्ध वैधानिक कार्यवाही करने का पूर्ण अधिकार होगा।
+                </p>
+                <div className="flex items-center gap-2 p-1.5 bg-gray-50 rounded border border-gray-200">
+                  <FaCheckCircle className="text-green-600 text-sm flex-shrink-0" />
+                  <span className="font-semibold text-gray-800 text-xs">
+                    Student Confirmation: I agree to the above declaration
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            {/* FOOTER */}
+            <div className="flex justify-between text-xs text-gray-600 mt-2 pt-2 border-t border-gray-300" style={{ fontSize: '9px' }}>
+              <span><strong>Submission Date:</strong> {submissionDate}</span>
+              <span><strong>Print Date:</strong> {printDate}</span>
+            </div>
+
           </div>
         </div>
 
