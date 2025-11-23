@@ -105,139 +105,164 @@ const RegistrationDetails = () => {
   return (
     <>
       <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #printable-area,
-          #printable-area * {
-            visibility: visible;
-          }
-          #printable-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          .no-print {
-            display: none !important;
-          }
-          @page {
-            size: A4;
-            margin: 10mm;
-          }
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-        }
+  @media print {
+    html, body {
+      width: 210mm;
+      height: 297mm;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+    }
 
-        .registration-form {
-          max-width: 210mm;
-          margin: 0 auto;
-          background: white;
-          font-family: Arial, sans-serif;
-        }
+    body * {
+      visibility: hidden;
+    }
 
-        .registration-form table {
-          width: 100%;
-          border-collapse: collapse;
-        }
+    #printable-area,
+    #printable-area * {
+      visibility: visible;
+    }
 
-        .registration-form td,
-        .registration-form th {
-          border: 1px solid #000;
-          padding: 8px;
-          font-size: 13px;
-        }
+    #printable-area {
+      position: relative;
+      left: 0;
+      top: 0;
+      width: 100%;
+      page-break-after: avoid;
+    }
 
-        .registration-form .section-header {
-          background-color: #333;
-          color: white;
-          font-weight: bold;
-          text-align: center;
-          padding: 8px;
-          font-size: 14px;
-        }
+    .no-print {
+      display: none !important;
+    }
 
-        .registration-form .label-cell {
-          background-color: #f5f5f5;
-          font-weight: 600;
-          width: 25%;
-        }
+    @page {
+      size: A4 portrait;
+      margin: 10mm;
+    }
 
-        .registration-form .header-section {
-          border: 2px solid #000;
-          padding: 15px;
-          margin-bottom: 0;
-        }
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
 
-        .registration-form .college-title {
-          color: #B8860B;
-          font-size: 32px;
-          font-weight: bold;
-          text-align: center;
-          margin: 0;
-          font-family: 'Times New Roman', serif;
-        }
+  /* --- LAYOUT / SIZING TUNED FOR 1-PAGE A4 --- */
 
-        .registration-form .college-code {
-          color: #B8860B;
-          font-size: 20px;
-          font-weight: bold;
-          text-align: center;
-          margin: 5px 0;
-        }
+  .registration-form {
+    width: 190mm;                    /* content area inside 10mm margins */
+    margin: 0 auto;
+    background: white;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    padding: 5mm 5mm 4mm 5mm;        /* compact padding so everything fits */
+  }
 
-        .registration-form .college-address {
-          color: #B8860B;
-          font-size: 18px;
-          font-weight: bold;
-          text-align: center;
-          margin: 5px 0;
-        }
+  .registration-form * {
+    box-sizing: border-box;
+  }
 
-        .registration-form .reg-barcode-row td {
-          padding: 10px 8px;
-        }
+  .registration-form table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;             /* prevent columns from blowing up */
+  }
 
-        .registration-form .education-table th {
-          background-color: #f5f5f5;
-          font-weight: 600;
-          font-size: 12px;
-          text-align: left;
-        }
+  .registration-form td,
+  .registration-form th {
+    border: 1px solid #000;
+    padding: 4px;
+    font-size: 11px;                 /* slightly smaller so all fits */
+    word-wrap: break-word;
+  }
 
-        .registration-form .education-table .qual-label {
-          background-color: #f5f5f5;
-          font-weight: 600;
-        }
+  .registration-form .section-header {
+    background-color: #333;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 4px;
+    font-size: 12px;
+  }
 
-        .registration-form .document-cell {
-          text-align: center;
-          vertical-align: top;
-          padding: 15px;
-        }
+  .registration-form .label-cell {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    width: 22%;
+  }
 
-        .registration-form .document-img {
-          max-width: 150px;
-          max-height: 150px;
-          margin: 10px auto;
-          display: block;
-        }
+  .registration-form .header-section {
+    border: 2px solid #000;
+    padding: 6px;
+    margin-bottom: 4px;
+  }
 
-        .registration-form .declaration-text {
-          text-align: justify;
-          font-size: 11px;
-          line-height: 1.6;
-          padding: 15px;
-        }
+  .registration-form .college-title {
+    color: #B8860B;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    font-family: 'Times New Roman', serif;
+  }
 
-        .registration-form .footer-dates {
-          font-size: 12px;
-          padding: 10px 15px;
-        }
-      `}</style>
+  .registration-form .college-code {
+    color: #B8860B;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    margin: 2px 0;
+  }
+
+  .registration-form .college-address {
+    color: #B8860B;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    margin: 2px 0;
+  }
+
+  .registration-form .reg-barcode-row td {
+    padding: 4px;
+  }
+
+  .registration-form .education-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    font-size: 10px;
+    text-align: left;
+  }
+
+  .registration-form .education-table .qual-label {
+    background-color: #f5f5f5;
+    font-weight: 600;
+  }
+
+  .registration-form .document-cell {
+    text-align: center;
+    vertical-align: top;
+    padding: 8px;
+  }
+
+  .registration-form .document-img {
+    max-width: 110px;
+    max-height: 110px;               /* smaller photo/sign so they fit */
+    margin: 6px auto;
+    display: block;
+  }
+
+  .registration-form .declaration-text {
+    text-align: justify;
+    font-size: 10px;
+    line-height: 1.4;
+    padding: 8px;
+  }
+
+  .registration-form .footer-dates {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+`}</style>
+
 
       <div className="min-h-screen bg-gray-50 py-8 px-4">
         {/* Success Banner - Only visible on screen */}
